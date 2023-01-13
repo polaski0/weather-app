@@ -195,7 +195,6 @@ const Home = () => {
                   <p>Cloudy</p>
                   <p>H: 32 . L: 26</p>
                 </div>
-                .flex
               </div>
             </div>
             

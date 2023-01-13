@@ -124,7 +124,7 @@ const getCurrentTime = () => {
     hours = hours - 12;
     session = 'PM';
   }
-  
+
   hours = hours < 10 ? "0" + hours : hours;
   minutes = minutes < 10 ? "0" + minutes : minutes;
   seconds = seconds < 10 ? "0" + seconds : seconds;
@@ -138,16 +138,15 @@ const Home = () => {
   const [timeRef, setTimeRef] = useState(getCurrentTime());
   const prevMin = useRef(0);
 
-  useEffect(()=>{
+  useEffect(() => {
     setInterval(() => {
       const test = getCurrentTime();
-      if(prevMin.current != test.split(' : ')[1]){
+      if (prevMin.current != test.split(' : ')[1]) {
         prevMin.current = test.split(' : ')[1]
         setTimeRef(test);
       }
-
     }, 1000);
-  },[])
+  }, [])
 
 
   return (
@@ -165,11 +164,47 @@ const Home = () => {
       <div className='absolute bottom-0 w-full'>
         <Foreground />
       </div>
-      <div className='w-[35%] h-full bg-slate-800/30 z-20 absolute right-0 flex flex-col justify-center items-center'>
-        {/* <button className='p-4 text-white font-bold' onClick={handleChangeTime}>Change Time</button> */}
-        <div>
-          <p className='text-white font-bold'>{`${timeRef.split(' ')[0]} : ${timeRef.split(' ')[2]} ${timeRef.split(' ')[5]}`}</p>
+      <div className='w-[35%] h-full bg-slate-800/30 backdrop-blur-md z-20 absolute right-0 flex flex-col p-3'>
+
+        <div className="flex flex-col gap-10 min-w-full">
+          {/* search */}
+          <div className="flex flex-row justify-between border-b border-white py-2 px-1">
+            <input type="text" className="w-full bg-transparent outline-none text-sm text-white placeholder:text-white/75" placeholder='Search location...' />
+            <div>O</div>
+          </div>
+
+          <div className="flex flex-row w-full justify-center gap-5">
+            <p className="text-8xl">32</p>
+            <div className="min-w-[1px] bg-white"></div>
+            <div className="flex flex-col self-center gap-1">
+              <p className="text-xl">Manila</p>
+              <div className="flex flex-row text-sm gap-4">
+                <p>Monday</p>
+                <p>{`${timeRef.split(' ')[0]}:${timeRef.split(' ')[2]} ${timeRef.split(' ')[5]}`}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col w-full">
+            <p>Weather Forecast</p>
+
+            <div className="flex flex-col">
+              <div className="flex flex-row w-full justify-evenly items-center">
+                <p className="text-7xl">O</p>
+                <div className="flex flex-col">
+                  <p>Cloudy</p>
+                  <p>H: 32 . L: 26</p>
+                </div>
+                .flex
+              </div>
+            </div>
+            
+          </div>
         </div>
+
+        {/* <div>
+          <p className='text-white font-bold'>{`${timeRef.split(' ')[0]} : ${timeRef.split(' ')[2]} ${timeRef.split(' ')[5]}`}</p>
+        </div> */}
       </div>
     </div>
   )

@@ -1,0 +1,17 @@
+:root {
+    --mountain-highlights: #FCF0D8;
+    --mountain-base: #7597A7;
+}
+
+.mountain-base,
+.mountain-highlights{
+    transition: all 1s ease-in-out;
+}
+
+.mountain-base {
+    fill: var(--mountain-base);
+}
+
+.mountain-highlights {
+    fill: var(--mountain-highlights);
+}

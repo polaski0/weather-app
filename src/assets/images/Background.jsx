@@ -1,16 +1,52 @@
 import React from 'react';
+import '../svg.css';
+const DATA = {
 
-export const MountainBackground = () => {
+    dawn : {
+        mountain : {
+            base: '#7597A7',
+            highlights: '#FCF0D8'
+        }
+    },
+
+    dusk : {
+        mountain : {
+            base: '#E5B5C7',
+            highlights: '#F0DDC1'
+        }
+    }
+
+}
+
+
+const handleTime = (time) => {
+    let key;
+    switch(time){
+        case 0: key = 'dawn'; break;
+        case 1: key = 'dusk'; break;
+        case 2: key = 'dawn'; break;
+        case 3: key = 'dusk'; break;
+        default: break;
+    }
+
+    document.documentElement.style.cssText = `
+    --mountain-base: ${DATA[key].mountain.base};
+    --mountain-highlights: ${DATA[key].mountain.highlights};
+    `;
+}
+
+export const MountainBackground = ({time}) => {
+    handleTime(time);
     return (
         <svg width="100%" height="100%" viewBox="0 0 1920 805" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask0_49_39" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="-60" y="0" width="2129" height="852">
-                <path d="M232.5 237L-60 379.5V851.5H2068.5V73.5L1893.5 190L1874 176L1603.5 302L1445.5 257L1265 176L1258.5 190L984.5 0.5L787.5 148.5V142.5L660.5 228L551.5 197.5L501 237L346 176L258 257L232.5 237Z" fill="#A3C7E7" />
+                <path className='mountain-base' d="M232.5 237L-60 379.5V851.5H2068.5V73.5L1893.5 190L1874 176L1603.5 302L1445.5 257L1265 176L1258.5 190L984.5 0.5L787.5 148.5V142.5L660.5 228L551.5 197.5L501 237L346 176L258 257L232.5 237Z" />
             </mask>
             <g mask="url(#mask0_49_39)">
-                <path d="M232.5 237L-60 379.5V851.5H2068.5V73.5L1893.5 190L1874 176L1603.5 302L1445.5 257L1265 176L1258.5 190L984.5 0.5L787.5 148.5V142.5L660.5 228L551.5 197.5L501 237L346 176L258 257L232.5 237Z" fill="#7597A7" />
-                <path d="M1061 207L978.5 -10.5L755.5 156L389.5 433.5L502.5 469.5L1103 508L1041.5 245.5L1002 196.5L1061 207Z" fill="#FCF0D8" />
-                <path d="M1893.5 189.5L1863 111L1640 277.5L1291 497L1387 591L1940.5 422.5L1901.5 218.5L1851 226L1893.5 189.5Z" fill="#FCF0D8" />
-                <path d="M553 195.5L343.5 154.5L230 233L204 249L220 252.5L238.5 251L220 282L146 390.5L296.5 285.5L343.5 309.5L427.5 292V329.5H472L625.5 246L534 233L553 195.5Z" fill="#FCF0D8" />
+                <path className='mountain-base' d="M232.5 237L-60 379.5V851.5H2068.5V73.5L1893.5 190L1874 176L1603.5 302L1445.5 257L1265 176L1258.5 190L984.5 0.5L787.5 148.5V142.5L660.5 228L551.5 197.5L501 237L346 176L258 257L232.5 237Z"/>
+                <path className='mountain-highlights' d="M1061 207L978.5 -10.5L755.5 156L389.5 433.5L502.5 469.5L1103 508L1041.5 245.5L1002 196.5L1061 207Z" />
+                <path className='mountain-highlights' d="M1893.5 189.5L1863 111L1640 277.5L1291 497L1387 591L1940.5 422.5L1901.5 218.5L1851 226L1893.5 189.5Z" />
+                <path className='mountain-highlights' d="M553 195.5L343.5 154.5L230 233L204 249L220 252.5L238.5 251L220 282L146 390.5L296.5 285.5L343.5 309.5L427.5 292V329.5H472L625.5 246L534 233L553 195.5Z" />
             </g>
         </svg>
     )

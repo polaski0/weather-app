@@ -1,11 +1,28 @@
 :root {
     --mountain-highlights: #FCF0D8;
     --mountain-base: #7597A7;
+
+    --midground-near: #203548;
+    --midground-far: #3C5764;
+
+    --foreground-base: #152B39;
+
+    --background-from: #1A6C95;
+    --background-via: #ABB6A2;
+    --background-to: #CA8C63;
 }
 
+.background-base,
 .mountain-base,
-.mountain-highlights{
+.mountain-highlights,
+.midground-near,
+.midground-far,
+.foreground-base {
     transition: all 1s ease-in-out;
+}
+
+.background-base {
+    background: linear-gradient(var(--background-from), var(--background-via), var(--background-to));
 }
 
 .mountain-base {
@@ -14,4 +31,16 @@
 
 .mountain-highlights {
     fill: var(--mountain-highlights);
+}
+
+.midground-near {
+    fill: var(--midground-near)
+}
+
+.midground-far {
+    fill: var(--midground-far);
+}
+
+.foreground-base {
+    fill: var(--foreground-base);
 }

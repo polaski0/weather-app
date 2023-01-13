@@ -82,7 +82,6 @@ const DATA = {
 
 };
 
-
 const handleTime = (time) => {
   let key;
   switch (time) {
@@ -105,6 +104,8 @@ const handleTime = (time) => {
   --midground-far: ${DATA[key].midground.far};
 
   --foreground-base: ${DATA[key].foreground.base};
+
+  --curtain-opacity:0;
   `;
 };
 
@@ -112,19 +113,15 @@ const Home = () => {
 
   const DATA_TIME = [0, 1, 2, 3];
   const [time, setTime] = useState(0);
-  // let gen;
-
-  // const handleChangeTime = () => {
-  //   const getTime = () => {
-  //     gen = DATA_TIME[Math.floor(Math.random() * DATA_TIME.length)]
-  //     if (gen == time) getTime();
-  //   };
-
-  //   getTime();
-  //   setTime(gen)
-  // };
-
+ 
   const handleChangeTime = () => {
+    
+    document.documentElement.style.cssText = `
+    --curtain-from: var(--background-from); 
+    --curtain-via: var(--background-via); 
+    --curtain-to: var(--background-to); 
+    `;
+
     setTime((prevState) => {
       return prevState >= DATA_TIME.length - 1 ? 0 : prevState + 1;
     });
@@ -135,7 +132,8 @@ const Home = () => {
   }, [time]);
 
   return (
-    <div className='background-base min-h-[100vh] w-full'>
+    <div className='relative background-base min-h-[100vh] w-full'>
+      <div className="absolute top-0 left-0 min-w-full background-test min-h-[100vh] max-h-[100vh]"></div>
       <div className='absolute bottom-0 w-full'>
         <MountainBackground />
       </div>

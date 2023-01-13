@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Foreground, MidgroundFar, MidgroundNear, MountainBackground } from '../images/Background';
 import '../svg.css';
 
@@ -82,7 +82,6 @@ const DATA = {
 
 };
 
-
 const handleTime = (time) => {
   let key;
   switch (time) {
@@ -108,31 +107,66 @@ const handleTime = (time) => {
   `;
 };
 
-const Home = () => {
+const getCurrentTime = () => {
+  const date = new Date();
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let seconds = date.getSeconds();
+  let session = 'AM';
 
-  const DATA_TIME = [0, 1, 2, 3];
-  const [time, setTime] = useState(0);
-  // let gen;
-
-  // const handleChangeTime = () => {
-  //   const getTime = () => {
-  //     gen = DATA_TIME[Math.floor(Math.random() * DATA_TIME.length)]
-  //     if (gen == time) getTime();
-  //   };
-
-  //   getTime();
-  //   setTime(gen)
-  // };
-
-  const handleChangeTime = () => {
-    setTime((prevState) => {
-      return prevState >= DATA_TIME.length - 1 ? 0 : prevState + 1;
-    });
+  if (hours == 0) {
+    hours = 12;
   }
 
+  if (hours >= 12) {
+    hours = hours - 12;
+    session = 'PM';
+  }
+
+  hours = hours <= 0 ? "0" + hours : hours;
+  minutes = minutes <= 0 ? "0" + minutes : minutes;
+  seconds = seconds <= 0 ? "0" + seconds : seconds;
+
+  return `${hours} : ${minutes} : ${seconds} ${session}`;
+};
+
+const Home = () => {
+  // const DATA_TIME = [0, 1, 2, 3];
+  const timeRef = useRef(getCurrentTime());
+
   useEffect(() => {
-    handleTime(time);
-  }, [time]);
+    const value = setInterval(() => {
+      const time = getCurrentTime();
+      // console.log('Inside', time);
+      return time;
+    }, 1000);
+
+    timeRef.current = value;
+  }, []);
+
+  useEffect(() => {
+    console.log('Timeref', timeRef);
+  }, [timeRef]);
+
+  // const [time, setTime] = useState(getCurrentTime());
+
+  // const handleChangeTime = () => {
+  //   setTime((prevState) => {
+  //     return prevState >= DATA_TIME.length - 1 ? 0 : prevState + 1;
+  //   });
+  // }
+
+  // useEffect(() => {
+  //   handleTime(time);
+  // }, [time]);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     time.current = getCurrentTime();
+  //   }, 1000);
+
+  //   // return () => clearInterval(interval);
+  // }, []);
 
   return (
     <div className='background-base min-h-[100vh] w-full'>
@@ -148,9 +182,11 @@ const Home = () => {
       <div className='absolute bottom-0 w-full'>
         <Foreground />
       </div>
-      <div className='w-[35%] h-full bg-slate-800/30 z-20 absolute right-0 flex justify-center items-center'>
-        <button className='p-4 text-white font-bold' onClick={handleChangeTime}>Change Time</button>
-        <div>{time}</div>
+      <div className='w-[35%] h-full bg-slate-800/30 z-20 absolute right-0 flex flex-col justify-center items-center'>
+        {/* <button className='p-4 text-white font-bold' onClick={handleChangeTime}>Change Time</button> */}
+        <div>
+          <p className='text-white font-bold'>{timeRef.current}</p>
+        </div>
       </div>
     </div>
   )

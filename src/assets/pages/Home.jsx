@@ -124,51 +124,31 @@ const getCurrentTime = () => {
     hours = hours - 12;
     session = 'PM';
   }
-
-  hours = hours <= 0 ? "0" + hours : hours;
-  minutes = minutes <= 0 ? "0" + minutes : minutes;
-  seconds = seconds <= 0 ? "0" + seconds : seconds;
+  
+  hours = hours < 10 ? "0" + hours : hours;
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+  seconds = seconds < 10 ? "0" + seconds : seconds;
 
   return `${hours} : ${minutes} : ${seconds} ${session}`;
 };
 
 const Home = () => {
   // const DATA_TIME = [0, 1, 2, 3];
-  const timeRef = useRef(getCurrentTime());
+  // const timeRef = useRef(getCurrentTime());
+  const [timeRef, setTimeRef] = useState(getCurrentTime());
+  const prevMin = useRef(0);
 
-  useEffect(() => {
-    const value = setInterval(() => {
-      const time = getCurrentTime();
-      // console.log('Inside', time);
-      return time;
+  useEffect(()=>{
+    setInterval(() => {
+      const test = getCurrentTime();
+      if(prevMin.current != test.split(' : ')[1]){
+        prevMin.current = test.split(' : ')[1]
+        setTimeRef(test);
+      }
+
     }, 1000);
+  },[])
 
-    timeRef.current = value;
-  }, []);
-
-  useEffect(() => {
-    console.log('Timeref', timeRef);
-  }, [timeRef]);
-
-  // const [time, setTime] = useState(getCurrentTime());
-
-  // const handleChangeTime = () => {
-  //   setTime((prevState) => {
-  //     return prevState >= DATA_TIME.length - 1 ? 0 : prevState + 1;
-  //   });
-  // }
-
-  // useEffect(() => {
-  //   handleTime(time);
-  // }, [time]);
-
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     time.current = getCurrentTime();
-  //   }, 1000);
-
-  //   // return () => clearInterval(interval);
-  // }, []);
 
   return (
     <div className='relative background-base min-h-[100vh] w-full'>
@@ -188,7 +168,7 @@ const Home = () => {
       <div className='w-[35%] h-full bg-slate-800/30 z-20 absolute right-0 flex flex-col justify-center items-center'>
         {/* <button className='p-4 text-white font-bold' onClick={handleChangeTime}>Change Time</button> */}
         <div>
-          <p className='text-white font-bold'>{timeRef.current}</p>
+          <p className='text-white font-bold'>{`${timeRef.split(' ')[0]} : ${timeRef.split(' ')[2]} ${timeRef.split(' ')[5]}`}</p>
         </div>
       </div>
     </div>

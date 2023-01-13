@@ -83,30 +83,76 @@ const DATA = {
 };
 
 const handleTime = (time) => {
-  let key;
-  switch (time) {
-    case 0: key = 'dawn'; break;
-    case 1: key = 'morning'; break;
-    case 2: key = 'dusk'; break;
-    case 3: key = 'evening'; break;
-    default: key = 'morning'; break;
-  }
+  const day = ['dawn', 'morning', 'dusk', 'evening'];
+  let prevKey = (time > 0) ? time - 1 : day.length - 1;
 
-  document.documentElement.style.cssText = `
-  --background-from: ${DATA[key].background.from}; 
-  --background-via: ${DATA[key].background.via}; 
-  --background-to: ${DATA[key].background.to}; 
+  // const input = `
+  //   --curtain-from: ${DATA[day[prevKey]].background.from};
+  //   --curtain-via: ${DATA[day[prevKey]].background.via};
+  //   --curtain-to: ${DATA[day[prevKey]].background.to};
 
-  --mountain-base: ${DATA[key].mountain.base};
-  --mountain-highlights: ${DATA[key].mountain.highlights};
+  //   --background-from: ${DATA[day[time]].background.from}; 
+  //   --background-via: ${DATA[day[time]].background.via}; 
+  //   --background-to: ${DATA[day[time]].background.to}; 
 
-  --midground-near: ${DATA[key].midground.near};
-  --midground-far: ${DATA[key].midground.far};
+  //   --mountain-base: ${DATA[day[time]].mountain.base};
+  //   --mountain-highlights: ${DATA[day[time]].mountain.highlights};
 
-  --foreground-base: ${DATA[key].foreground.base};
+  //   --midground-near: ${DATA[day[time]].midground.near};
+  //   --midground-far: ${DATA[day[time]].midground.far};
 
-  --curtain-opacity:0;
+  //   --foreground-base: ${DATA[day[time]].foreground.base};
+  // `;
+
+  // document.documentElement.style.cssText = input + `
+  //     --curtain-opacity: 1;
+  //   `;
+
+  // setTimeout(() => {
+  //   document.documentElement.style.cssText = input + `
+  //     --curtain-opacity: 0;
+  //   `;
+  // }, 1000);
+  const input = `
+    --curtain-from: ${DATA[day[prevKey]].background.from};
+    --curtain-via: ${DATA[day[prevKey]].background.via};
+    --curtain-to: ${DATA[day[prevKey]].background.to};
   `;
+
+  document.documentElement.style.cssText = input + `
+    --background-from: ${DATA[day[prevKey]].background.from}; 
+    --background-via: ${DATA[day[prevKey]].background.via}; 
+    --background-to: ${DATA[day[prevKey]].background.to};
+
+    --mountain-base: ${DATA[day[prevKey]].mountain.base};
+    --mountain-highlights: ${DATA[day[prevKey]].mountain.highlights};
+
+    --midground-near: ${DATA[day[prevKey]].midground.near};
+    --midground-far: ${DATA[day[prevKey]].midground.far};
+
+    --foreground-base: ${DATA[day[prevKey]].foreground.base};
+
+    --curtain-opacity: 1;
+  `;
+
+  setTimeout(() => {
+    document.documentElement.style.cssText = input + `
+      --background-from: ${DATA[day[time]].background.from}; 
+      --background-via: ${DATA[day[time]].background.via}; 
+      --background-to: ${DATA[day[time]].background.to};
+
+      --mountain-base: ${DATA[day[time]].mountain.base};
+      --mountain-highlights: ${DATA[day[time]].mountain.highlights};
+
+      --midground-near: ${DATA[day[time]].midground.near};
+      --midground-far: ${DATA[day[time]].midground.far};
+
+      --foreground-base: ${DATA[day[time]].foreground.base};
+
+      --curtain-opacity: 0;
+    `;
+  }, 800);
+
 };
 
 const getCurrentTime = () => {
@@ -133,46 +179,22 @@ const getCurrentTime = () => {
 };
 
 const Home = () => {
-  // const DATA_TIME = [0, 1, 2, 3];
-  const timeRef = useRef(getCurrentTime());
+  const DATA_TIME = [0, 1, 2, 3];
+  const [time, setTime] = useState(0);
+
+  const handleChangeTime = () => {
+    setTime((prevState) => {
+      return prevState >= DATA_TIME.length - 1 ? 0 : prevState + 1;
+    });
+  }
 
   useEffect(() => {
-    const value = setInterval(() => {
-      const time = getCurrentTime();
-      // console.log('Inside', time);
-      return time;
-    }, 1000);
-
-    timeRef.current = value;
-  }, []);
-
-  useEffect(() => {
-    console.log('Timeref', timeRef);
-  }, [timeRef]);
-
-  // const [time, setTime] = useState(getCurrentTime());
-
-  // const handleChangeTime = () => {
-  //   setTime((prevState) => {
-  //     return prevState >= DATA_TIME.length - 1 ? 0 : prevState + 1;
-  //   });
-  // }
-
-  // useEffect(() => {
-  //   handleTime(time);
-  // }, [time]);
-
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     time.current = getCurrentTime();
-  //   }, 1000);
-
-  //   // return () => clearInterval(interval);
-  // }, []);
+    handleTime(time);
+  }, [time]);
 
   return (
     <div className='relative background-base min-h-[100vh] w-full'>
-      <div className="absolute top-0 left-0 min-w-full background-test min-h-[100vh] max-h-[100vh]"></div>
+      {/* <div className="absolute top-0 left-0 min-w-full background-test min-h-[100vh] max-h-[100vh]"></div> */}
       <div className='absolute bottom-0 w-full'>
         <MountainBackground />
       </div>
@@ -186,9 +208,9 @@ const Home = () => {
         <Foreground />
       </div>
       <div className='w-[35%] h-full bg-slate-800/30 z-20 absolute right-0 flex flex-col justify-center items-center'>
-        {/* <button className='p-4 text-white font-bold' onClick={handleChangeTime}>Change Time</button> */}
+        <button className='p-4 text-white font-bold' onClick={handleChangeTime}>Change Time</button>
         <div>
-          <p className='text-white font-bold'>{timeRef.current}</p>
+          <p className='text-white font-bold'>{time}</p>
         </div>
       </div>
     </div>

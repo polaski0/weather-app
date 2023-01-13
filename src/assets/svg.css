@@ -11,41 +11,44 @@
     --background-via: #ABB6A2;
     --background-to: #CA8C63;
 
-    --curtain-opacity: 0;
     --curtain-from: #1A6C95;
     --curtain-via: #ABB6A2;
     --curtain-to: #CA8C63;
+
+    --curtain-opacity: 0;
 }
 
 .background-base,
+.background-base::before,
 .mountain-base,
 .mountain-highlights,
 .midground-near,
 .midground-far,
 .foreground-base,
 .background-test {
-    -webkit-transition: all 1s ease-out;  
-    -moz-transition: all 1s ease-out;  
-    -o-transition: all 1s ease-out;  
-    transition: all 1s ease-out;  
+    -webkit-transition: all 1s ease-out;
+    -moz-transition: all 1s ease-out;
+    -o-transition: all 1s ease-out;
+    transition: all 1s ease-out;
 }
 
 .background-base {
-    z-index: 0;
     background: linear-gradient(var(--background-from), var(--background-via), var(--background-to));
 }
 
-.background-base::after {
+.background-base::before {
     content: "";
     position: absolute;
-    top:0;
-    right:0;
-    bottom:0;
-    left:0;
-    z-index: 1;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     background: linear-gradient(var(--curtain-from), var(--curtain-via), var(--curtain-to));
     opacity: var(--curtain-opacity);
 }
+
 
 .mountain-base {
     fill: var(--mountain-base);
@@ -66,4 +69,3 @@
 .foreground-base {
     fill: var(--foreground-base);
 }
-

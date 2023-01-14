@@ -86,33 +86,6 @@ const handleTime = (time) => {
   const day = ['dawn', 'morning', 'dusk', 'evening'];
   let prevKey = (time > 0) ? time - 1 : day.length - 1;
 
-  // const input = `
-  //   --curtain-from: ${DATA[day[prevKey]].background.from};
-  //   --curtain-via: ${DATA[day[prevKey]].background.via};
-  //   --curtain-to: ${DATA[day[prevKey]].background.to};
-
-  //   --background-from: ${DATA[day[time]].background.from}; 
-  //   --background-via: ${DATA[day[time]].background.via}; 
-  //   --background-to: ${DATA[day[time]].background.to}; 
-
-  //   --mountain-base: ${DATA[day[time]].mountain.base};
-  //   --mountain-highlights: ${DATA[day[time]].mountain.highlights};
-
-  //   --midground-near: ${DATA[day[time]].midground.near};
-  //   --midground-far: ${DATA[day[time]].midground.far};
-
-  //   --foreground-base: ${DATA[day[time]].foreground.base};
-  // `;
-
-  // document.documentElement.style.cssText = input + `
-  //     --curtain-opacity: 1;
-  //   `;
-
-  // setTimeout(() => {
-  //   document.documentElement.style.cssText = input + `
-  //     --curtain-opacity: 0;
-  //   `;
-  // }, 1000);
   const input = `
     --curtain-from: ${DATA[day[prevKey]].background.from};
     --curtain-via: ${DATA[day[prevKey]].background.via};
@@ -151,7 +124,7 @@ const handleTime = (time) => {
 
       --curtain-opacity: 0;
     `;
-  }, 800);
+  }, 600);
 
 };
 

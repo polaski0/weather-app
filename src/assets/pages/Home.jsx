@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Foreground, MidgroundFar, MidgroundNear, MountainBackground } from '../images/Background';
 import '../svg.css';
 
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 const DATA = {
 
   dawn: {
@@ -114,25 +116,34 @@ const getCurrentTime = () => {
   let hours = date.getHours();
   let minutes = date.getMinutes();
   let seconds = date.getSeconds();
-  let session = 'AM';
-
-  if (hours == 0) {
-    hours = 12;
-  }
-
-  if (hours >= 12) {
-    hours = hours - 12;
-    session = 'PM';
-  }
 
   hours = hours < 10 ? "0" + hours : hours;
   minutes = minutes < 10 ? "0" + minutes : minutes;
   seconds = seconds < 10 ? "0" + seconds : seconds;
 
-  return `${hours} : ${minutes} : ${seconds} ${session}`;
+  let time = `${hours}:${minutes}:${seconds}`;
+
+  time = time.toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+  if (time.length > 1) { // If time format correct
+    time = time.slice(1);  // Remove full string match value
+    time[5] = +time[0] < 12 ? ' AM' : ' PM'; // Set AM/PM
+    time[0] = +time[0] % 12 || 12; // Adjust hours
+  }
+
+  return time.join('');
 };
 
 const Home = () => {
+
+  const [weatherData, setWeatherData] = useState(null);
+
+  useEffect(() => {
+    fetch('/response.json')
+      .then(res => res.json())
+      .then((res) => { setWeatherData(res) });
+  }, [])
+
   // const DATA_TIME = [0, 1, 2, 3];
   // const timeRef = useRef(getCurrentTime());
   const [timeRef, setTimeRef] = useState(getCurrentTime());
@@ -141,13 +152,16 @@ const Home = () => {
   useEffect(() => {
     setInterval(() => {
       const test = getCurrentTime();
-      if (prevMin.current != test.split(' : ')[1]) {
-        prevMin.current = test.split(' : ')[1]
+      if (prevMin.current != test.split(':')[1]) {
+        prevMin.current = test.split(':')[1]
         setTimeRef(test);
       }
     }, 1000);
   }, [])
 
+  const hourlyForecast = weatherData?.forecast.forecastday[0].hour.filter((hf, index) => {
+    return index >= new Date().getHours();
+  })
 
   return (
     <div className='relative background-base min-h-[100vh] w-full'>
@@ -174,30 +188,41 @@ const Home = () => {
           </div>
 
           <div className="flex flex-row w-full justify-center gap-5">
-            <p className="text-8xl">32</p>
+            <p className="text-8xl">{weatherData?.current.temp_c}<span className='font-thin text-3xl align-top'>&#8451;</span></p>
             <div className="min-w-[1px] bg-white"></div>
             <div className="flex flex-col self-center gap-1">
-              <p className="text-xl">Manila</p>
+              <p className="text-xl">{weatherData?.location.name}, {weatherData?.location.country}</p>
               <div className="flex flex-row text-sm gap-4">
-                <p>Monday</p>
-                <p>{`${timeRef.split(' ')[0]}:${timeRef.split(' ')[2]} ${timeRef.split(' ')[5]}`}</p>
+                <p>{DAYS[new Date().getDay()]}</p>
+                <p>{`${timeRef.split(':')[0]}:${timeRef.split(':')[1]} ${timeRef.split(' ')[1]}`}</p>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col w-full">
+          <div className="flex flex-col w-full gap-8">
             <p>Weather Forecast</p>
 
             <div className="flex flex-col">
               <div className="flex flex-row w-full justify-evenly items-center">
-                <p className="text-7xl">O</p>
+                <p className="text-7xl"><img src={weatherData?.current.condition.icon} alt="weather current condition"/></p>
                 <div className="flex flex-col">
-                  <p>Cloudy</p>
+                  <p>{weatherData?.current.condition.text}</p>
                   <p>H: 32 . L: 26</p>
                 </div>
               </div>
             </div>
-            
+
+            <div className="flex flex-row gap-2 items-start flex-1">
+              {hourlyForecast?.map((fcHr, index) => {
+                return <HourlyCard key={index} index={index} forecast={fcHr}/>
+              })}
+
+            </div>
+
+            <div className="flex flex-col gap-1 items-start flex-1">
+              {/* <DailyCard /> */}
+            </div>
+
           </div>
         </div>
 
@@ -208,5 +233,33 @@ const Home = () => {
     </div>
   )
 };
+
+const convert24 = (hour) => {
+  if (hour < 13) return hour + 'AM';
+  return hour - 12 + 'PM';
+}
+
+const HourlyCard = ({index, forecast}) => {
+  console.log(index, forecast)
+  if (index < 6) {
+    return (
+      <div className="flex flex-col items-center gap-4 flex-1">
+        <p>{index == 0 ? 'Now' : convert24(new Date(forecast?.time).getHours())}</p>
+        <img src={forecast?.condition.icon} alt="" />
+        <p>{Math.floor(forecast?.temp_c)}<span className='font-thin text-xs align-top'>&deg;</span></p>
+      </div>
+    )
+  }
+}
+
+const DailyCard = ({ }) => {
+  return (
+    <div className="flex flex-row items-center gap-4 min-w-full bg-black">
+      <p className='flex-1'>Now</p>
+      <p className='flex-1'>0</p>
+      <p className='flex-1'>28</p>
+    </div>
+  )
+}
 
 export default Home;

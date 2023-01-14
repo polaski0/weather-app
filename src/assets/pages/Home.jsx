@@ -85,30 +85,49 @@ const DATA = {
 };
 
 const handleTime = (time) => {
-  let key;
-  switch (time) {
-    case 0: key = 'dawn'; break;
-    case 1: key = 'morning'; break;
-    case 2: key = 'dusk'; break;
-    case 3: key = 'evening'; break;
-    default: key = 'morning'; break;
-  }
+  const day = ['dawn', 'morning', 'dusk', 'evening'];
+  let prevKey = (time > 0) ? time - 1 : day.length - 1;
 
-  document.documentElement.style.cssText = `
-  --background-from: ${DATA[key].background.from}; 
-  --background-via: ${DATA[key].background.via}; 
-  --background-to: ${DATA[key].background.to}; 
-
-  --mountain-base: ${DATA[key].mountain.base};
-  --mountain-highlights: ${DATA[key].mountain.highlights};
-
-  --midground-near: ${DATA[key].midground.near};
-  --midground-far: ${DATA[key].midground.far};
-
-  --foreground-base: ${DATA[key].foreground.base};
-
-  --curtain-opacity:0;
+  const input = `
+    --curtain-from: ${DATA[day[prevKey]].background.from};
+    --curtain-via: ${DATA[day[prevKey]].background.via};
+    --curtain-to: ${DATA[day[prevKey]].background.to};
   `;
+
+  document.documentElement.style.cssText = input + `
+    --background-from: ${DATA[day[prevKey]].background.from}; 
+    --background-via: ${DATA[day[prevKey]].background.via}; 
+    --background-to: ${DATA[day[prevKey]].background.to};
+
+    --mountain-base: ${DATA[day[prevKey]].mountain.base};
+    --mountain-highlights: ${DATA[day[prevKey]].mountain.highlights};
+
+    --midground-near: ${DATA[day[prevKey]].midground.near};
+    --midground-far: ${DATA[day[prevKey]].midground.far};
+
+    --foreground-base: ${DATA[day[prevKey]].foreground.base};
+
+    --curtain-opacity: 1;
+  `;
+
+  setTimeout(() => {
+    document.documentElement.style.cssText = input + `
+      --background-from: ${DATA[day[time]].background.from}; 
+      --background-via: ${DATA[day[time]].background.via}; 
+      --background-to: ${DATA[day[time]].background.to};
+
+      --mountain-base: ${DATA[day[time]].mountain.base};
+      --mountain-highlights: ${DATA[day[time]].mountain.highlights};
+
+      --midground-near: ${DATA[day[time]].midground.near};
+      --midground-far: ${DATA[day[time]].midground.far};
+
+      --foreground-base: ${DATA[day[time]].foreground.base};
+
+      --curtain-opacity: 0;
+    `;
+  }, 600);
+
 };
 
 const getCurrentTime = () => {
@@ -165,7 +184,7 @@ const Home = () => {
 
   return (
     <div className='relative background-base min-h-[100vh] w-full'>
-      <div className="absolute top-0 left-0 min-w-full background-test min-h-[100vh] max-h-[100vh]"></div>
+      {/* <div className="absolute top-0 left-0 min-w-full background-test min-h-[100vh] max-h-[100vh]"></div> */}
       <div className='absolute bottom-0 w-full'>
         <MountainBackground />
       </div>

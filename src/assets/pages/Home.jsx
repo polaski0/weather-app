@@ -130,127 +130,151 @@ const handleTime = (time) => {
 
 };
 
-const getCurrentTime = () => {
-  const date = new Date();
-  let hours = date.getHours();
-  let minutes = date.getMinutes();
-  let seconds = date.getSeconds();
 
-  hours = hours < 10 ? "0" + hours : hours;
-  minutes = minutes < 10 ? "0" + minutes : minutes;
-  seconds = seconds < 10 ? "0" + seconds : seconds;
-
-  let time = `${hours}:${minutes}:${seconds}`;
-
-  time = time.toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
-
-  if (time.length > 1) { // If time format correct
-    time = time.slice(1);  // Remove full string match value
-    time[5] = +time[0] < 12 ? ' AM' : ' PM'; // Set AM/PM
-    time[0] = +time[0] % 12 || 12; // Adjust hours
-  }
-
-  return time.join('');
-};
 
 const Home = () => {
 
   const [weatherData, setWeatherData] = useState(null);
+  const [timeRef, setTimeRef] = useState('00:00 ');
+  const prevMin = useRef(0);
+  const timezoneRef = useRef('');
+  const dateRef = useRef(null);
+  const [loading, setLoading] = useState(true);
+
+  const getCurrentTime = (timezone) => {
+
+    const currentDate = new Date();
+    const date = new Date(currentDate.toLocaleString('en-US', { timeZone: timezone }));
+
+    dateRef.current = date;
+    setLoading(false);
+
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds();
+
+    hours = hours < 10 ? "0" + hours : hours;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+
+    let time = `${hours}:${minutes}:${seconds}`;
+
+    time = time.toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+    if (time.length > 1) { // If time format correct
+      time = time.slice(1);  // Remove full string match value
+      time[5] = +time[0] < 12 ? ' AM' : ' PM'; // Set AM/PM
+      time[0] = +time[0] % 12 || 12; // Adjust hours
+    }
+    return time.join('');
+  };
 
   useEffect(() => {
-    fetch('/response.json')
+    fetch('/response_newyork.json')
       .then(res => res.json())
-      .then((res) => { setWeatherData(res) });
+      .then((res) => { setWeatherData(res);});
+
   }, [])
 
-  // const DATA_TIME = [0, 1, 2, 3];
-  // const timeRef = useRef(getCurrentTime());
-  const [timeRef, setTimeRef] = useState(getCurrentTime());
-  const prevMin = useRef(0);
+  useEffect(() => {
+    if (weatherData) {
+      timezoneRef.current = weatherData?.location.tz_id;
+    }
+  }, [weatherData])
 
   useEffect(() => {
     setInterval(() => {
-      const test = getCurrentTime();
-      if (prevMin.current != test.split(':')[1]) {
-        prevMin.current = test.split(':')[1]
-        setTimeRef(test);
+      const returnTime = getCurrentTime(timezoneRef.current);
+      if (prevMin.current != returnTime.split(':')[1]) {
+        prevMin.current = returnTime.split(':')[1]
+        setTimeRef(returnTime);
       }
     }, 1000);
-  }, [])
+  }, [weatherData])
+
 
   const hourlyForecast = weatherData?.forecast.forecastday[0].hour.filter((hf, index) => {
-    return index >= new Date().getHours();
+    return dateRef.current ? index >= dateRef.current.getHours() : new Date().getHours();
   })
 
-  return (
-    <div className='relative background-base min-h-[100vh] w-full'>
-      {/* <div className="absolute top-0 left-0 min-w-full background-test min-h-[100vh] max-h-[100vh]"></div> */}
-      <div className='absolute bottom-0 w-full'>
-        <MountainBackground />
-      </div>
-      <div className='absolute bottom-[12vh] w-full'>
-        <MidgroundFar />
-      </div>
-      <div className='absolute bottom-0 w-full'>
-        <MidgroundNear />
-      </div>
-      <div className='absolute bottom-0 w-full'>
-        <Foreground />
-      </div>
-      <div className='w-[35%] h-full bg-slate-800/30 backdrop-blur-md z-20 absolute right-0 flex flex-col p-3'>
+  if (loading) {
+    return(
+      <div className='text-black'>Loading...</div>
+    )
+  } else {
+    return (
+      <div className='relative background-base min-h-[100vh] w-full'>
+        {/* <div className="absolute top-0 left-0 min-w-full background-test min-h-[100vh] max-h-[100vh]"></div> */}
+        <div className='absolute bottom-0 w-full'>
+          <MountainBackground />
+        </div>
+        <div className='absolute bottom-[12vh] w-full'>
+          <MidgroundFar />
+        </div>
+        <div className='absolute bottom-0 w-full'>
+          <MidgroundNear />
+        </div>
+        <div className='absolute bottom-0 w-full'>
+          <Foreground />
+        </div>
+        <div className='w-[35%] h-full bg-slate-800/30 backdrop-blur-md z-20 absolute right-0 flex flex-col p-3'>
 
-        <div className="flex flex-col gap-10 min-w-full">
-          {/* search */}
-          <div className="flex flex-row justify-between border-b border-white py-2 px-1">
-            <input type="text" className="w-full bg-transparent outline-none text-sm text-white placeholder:text-white/75" placeholder='Search location...' />
-            <div>O</div>
-          </div>
-
-          <div className="flex flex-row w-full justify-center gap-5">
-            <p className="text-8xl">{weatherData?.current.temp_c}<span className='font-thin text-3xl align-top'>&#8451;</span></p>
-            <div className="min-w-[1px] bg-white"></div>
-            <div className="flex flex-col self-center gap-1">
-              <p className="text-xl">{weatherData?.location.name}, {weatherData?.location.country}</p>
-              <div className="flex flex-row text-sm gap-4">
-                <p>{DAYS[new Date().getDay()]}</p>
-                <p>{`${timeRef.split(':')[0]}:${timeRef.split(':')[1]} ${timeRef.split(' ')[1]}`}</p>
-              </div>
+          <div className="flex flex-col gap-10 min-w-full">
+            {/* search */}
+            <div className="flex flex-row justify-between border-b border-white py-2 px-1">
+              <input type="text" className="w-full bg-transparent outline-none text-sm text-white placeholder:text-white/75" placeholder='Search location...' />
+              <div>O</div>
             </div>
-          </div>
 
-          <div className="flex flex-col w-full gap-8">
-            <p>Weather Forecast</p>
-
-            <div className="flex flex-col">
-              <div className="flex flex-row w-full justify-evenly items-center">
-                <p className="text-7xl"><img src={weatherData?.current.condition.icon} alt="weather current condition"/></p>
-                <div className="flex flex-col">
-                  <p>{weatherData?.current.condition.text}</p>
-                  <p>H: 32 . L: 26</p>
+            <div className="flex flex-row w-full justify-center gap-5">
+              <p className="text-8xl">{weatherData?.current.temp_c}<span className='font-thin text-3xl align-top'>&#8451;</span></p>
+              <div className="min-w-[1px] bg-white"></div>
+              <div className="flex flex-col self-center gap-1">
+                <p className="text-xl">{weatherData?.location.name}, {weatherData?.location.country}</p>
+                <div className="flex flex-row text-sm gap-4">
+                  <p>{DAYS[dateRef.current ? dateRef.current.getDay() : new Date().getDay()]}</p>
+                  <p>{`${timeRef.split(':')[0]}:${timeRef.split(':')[1]} ${timeRef.split(' ')[1]}`}</p>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-row gap-2 items-start flex-1">
-              {hourlyForecast?.map((fcHr, index) => {
-                return <HourlyCard key={index} index={index} forecast={fcHr}/>
-              })}
+            <div className="flex flex-col w-full gap-8">
+              <p>Weather Forecast</p>
+
+              <div className="flex flex-col">
+                <div className="flex flex-row w-full justify-evenly items-center">
+                  <p className="text-7xl"><img src={weatherData?.current.condition.icon} alt="weather current condition" /></p>
+                  <div className="flex flex-col">
+                    <p>{weatherData?.current.condition.text}</p>
+                    <p>H: 32 . L: 26</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-row gap-2 items-start flex-1">
+                {hourlyForecast?.map((fcHr, index) => {
+                  return <HourlyCard key={index} index={index} forecast={fcHr} />
+                })}
+
+              </div>
+
+              <div className="flex flex-col gap-1 items-start flex-1">
+                {/* <DailyCard /> */}
+              </div>
 
             </div>
-
-            <div className="flex flex-col gap-1 items-start flex-1">
-              {/* <DailyCard /> */}
-            </div>
-
           </div>
-        </div>
 
-        {/* <div>
+          {/* <div>
           <p className='text-white font-bold'>{`${timeRef.split(' ')[0]} : ${timeRef.split(' ')[2]} ${timeRef.split(' ')[5]}`}</p>
         </div> */}
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
+
+
 };
 
 const convert24 = (hour) => {
@@ -258,8 +282,7 @@ const convert24 = (hour) => {
   return hour - 12 + 'PM';
 }
 
-const HourlyCard = ({index, forecast}) => {
-  console.log(index, forecast)
+const HourlyCard = ({ index, forecast }) => {
   if (index < 6) {
     return (
       <div className="flex flex-col items-center gap-4 flex-1">

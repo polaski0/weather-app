@@ -84,9 +84,11 @@ const DATA = {
 
 };
 
-const handleTime = (time) => {
+const handleBackgroundChange = (key) => {
   const day = ['dawn', 'morning', 'dusk', 'evening'];
-  let prevKey = (time > 0) ? time - 1 : day.length - 1;
+  let prevKey = (key > 0) ? key - 1 : day.length - 1;
+
+  console.log(prevKey, key);
 
   const input = `
     --curtain-from: ${DATA[day[prevKey]].background.from};
@@ -112,37 +114,33 @@ const handleTime = (time) => {
 
   setTimeout(() => {
     document.documentElement.style.cssText = input + `
-      --background-from: ${DATA[day[time]].background.from}; 
-      --background-via: ${DATA[day[time]].background.via}; 
-      --background-to: ${DATA[day[time]].background.to};
+      --background-from: ${DATA[day[key]].background.from}; 
+      --background-via: ${DATA[day[key]].background.via}; 
+      --background-to: ${DATA[day[key]].background.to};
 
-      --mountain-base: ${DATA[day[time]].mountain.base};
-      --mountain-highlights: ${DATA[day[time]].mountain.highlights};
+      --mountain-base: ${DATA[day[key]].mountain.base};
+      --mountain-highlights: ${DATA[day[key]].mountain.highlights};
 
-      --midground-near: ${DATA[day[time]].midground.near};
-      --midground-far: ${DATA[day[time]].midground.far};
+      --midground-near: ${DATA[day[key]].midground.near};
+      --midground-far: ${DATA[day[key]].midground.far};
 
-      --foreground-base: ${DATA[day[time]].foreground.base};
+      --foreground-base: ${DATA[day[key]].foreground.base};
 
       --curtain-opacity: 0;
     `;
-  }, 600);
-
+  }, 500);
 };
 
-
-
 const Home = () => {
-
   const [weatherData, setWeatherData] = useState(null);
   const [timeRef, setTimeRef] = useState('00:00 ');
   const prevMin = useRef(0);
   const timezoneRef = useRef('');
   const dateRef = useRef(null);
+  const [currDayTime, setCurrDayTime] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const getCurrentTime = (timezone) => {
-
     const currentDate = new Date();
     const date = new Date(currentDate.toLocaleString('en-US', { timeZone: timezone }));
 
@@ -152,54 +150,84 @@ const Home = () => {
     let hours = date.getHours();
     let minutes = date.getMinutes();
     let seconds = date.getSeconds();
-
+  
     hours = hours < 10 ? "0" + hours : hours;
     minutes = minutes < 10 ? "0" + minutes : minutes;
     seconds = seconds < 10 ? "0" + seconds : seconds;
-
-
+  
     let time = `${hours}:${minutes}:${seconds}`;
-
+  
     time = time.toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
-
+  
     if (time.length > 1) { // If time format correct
       time = time.slice(1);  // Remove full string match value
       time[5] = +time[0] < 12 ? ' AM' : ' PM'; // Set AM/PM
       time[0] = +time[0] % 12 || 12; // Adjust hours
     }
+  
     return time.join('');
+  };
+
+  const handleTimeChange = (date) => {
+    const currHour = date.getHours();
+    let key = 0;
+
+    if (currHour >= 19 && currHour <= 23 || currHour >= 0 && currHour <= 4) {
+      key = 3;
+      key !== currDayTime && setCurrDayTime(key);
+      return;
+    } else if (currHour >= 5 && currHour <= 7) {
+      key = 0;
+      key !== currDayTime && setCurrDayTime(key);
+      return;
+    } else if (currHour >= 8 && currHour <= 15) {
+      key = 1;
+      key !== currDayTime && setCurrDayTime(key);
+      return;
+    } else if (currHour >= 16 && currHour <= 18) {
+      key = 2;
+      key !== currDayTime && setCurrDayTime(key);
+      return;
+    }
   };
 
   useEffect(() => {
     fetch('/response_newyork.json')
       .then(res => res.json())
-      .then((res) => { setWeatherData(res);});
+      .then((res) => { setWeatherData(res); });
 
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (weatherData) {
       timezoneRef.current = weatherData?.location.tz_id;
     }
-  }, [weatherData])
+  }, [weatherData]);
 
   useEffect(() => {
+    prevMin.current = 0;
+
     setInterval(() => {
       const returnTime = getCurrentTime(timezoneRef.current);
+      handleTimeChange(dateRef.current);
       if (prevMin.current != returnTime.split(':')[1]) {
         prevMin.current = returnTime.split(':')[1]
         setTimeRef(returnTime);
       }
     }, 1000);
-  }, [weatherData])
+  }, [weatherData]);
 
+  useEffect(() => {
+    console.log(currDayTime);
+    handleBackgroundChange(currDayTime);
+  }, [currDayTime]);
 
   const hourlyForecast = weatherData?.forecast.forecastday[0].hour.filter((hf, index) => {
     return dateRef.current ? index >= dateRef.current.getHours() : new Date().getHours();
   })
 
   if (loading) {
-    return(
+    return (
       <div className='text-black'>Loading...</div>
     )
   } else {

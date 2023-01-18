@@ -88,8 +88,6 @@ const handleBackgroundChange = (key) => {
   const day = ['dawn', 'morning', 'dusk', 'evening'];
   let prevKey = (key > 0) ? key - 1 : day.length - 1;
 
-  console.log(prevKey, key);
-
   const input = `
     --curtain-from: ${DATA[day[prevKey]].background.from};
     --curtain-via: ${DATA[day[prevKey]].background.via};
@@ -139,6 +137,7 @@ const Home = () => {
   const dateRef = useRef(null);
   const [currDayTime, setCurrDayTime] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('Manila');
 
   const getCurrentTime = (timezone) => {
     const currentDate = new Date();
@@ -191,11 +190,21 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    fetch('/response_newyork.json')
+  const fetchWeatherData = () => {
+    fetch(`http://api.weatherapi.com/v1/forecast.json?key=fa354737533744978f2134539231301&q=${search}&days=7`)
       .then(res => res.json())
-      .then((res) => { setWeatherData(res); });
+      .then((res) => { 
+        if(res.error){
+          alert(res.error.message);
+        }else{
+          setWeatherData(res); 
+        }
+      })
 
+  }
+
+  useEffect(() => {
+    fetchWeatherData();
   }, []);
 
   useEffect(() => {
@@ -218,11 +227,14 @@ const Home = () => {
   }, [weatherData]);
 
   useEffect(() => {
-    console.log(currDayTime);
     handleBackgroundChange(currDayTime);
   }, [currDayTime]);
 
-  const hourlyForecast = weatherData?.forecast.forecastday[0].hour.filter((hf, index) => {
+  const handleSearch = () => {
+    fetchWeatherData();
+  }
+
+  const hourlyForecast = weatherData?.forecast?.forecastday[0].hour.filter((hf, index) => {
     return dateRef.current ? index >= dateRef.current.getHours() : new Date().getHours();
   })
 
@@ -251,8 +263,8 @@ const Home = () => {
           <div className="flex flex-col gap-10 min-w-full">
             {/* search */}
             <div className="flex flex-row justify-between border-b border-white py-2 px-1">
-              <input type="text" className="w-full bg-transparent outline-none text-sm text-white placeholder:text-white/75" placeholder='Search location...' />
-              <div>O</div>
+              <input type="text" className="w-full bg-transparent outline-none text-sm text-white placeholder:text-white/75" placeholder='Search location...' value={search} onInput={(e) => {setSearch(e.target.value)}}/>
+              <div className="cursor-pointer" onClick={handleSearch}>O</div>
             </div>
 
             <div className="flex flex-row w-full justify-center gap-5">
